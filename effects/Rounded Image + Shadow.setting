@@ -1,0 +1,140 @@
+{
+	Tools = ordered() {
+		RoundedImageShadow = GroupOperator {
+			CtrlWZoom = false,
+			Inputs = ordered() {
+				EnableEffect = InstanceInput { SourceOp = "EffectBypass", Source = "EffectEnabled", Name = "Enable Effect", Page = "Image", Default = 1, },
+				ImageZoom = InstanceInput { SourceOp = "ImageTransform", Source = "Size", Name = "Card Scale", Page = "Image", Default = 1, MinScale = 0, MaxScale = 3, },
+				PositionX = InstanceInput { SourceOp = "ImageTransform", Source = "PositionX", Name = "Position X", Page = "Image", Default = 0.5, MinScale = 0, MaxScale = 1, },
+				PositionY = InstanceInput { SourceOp = "ImageTransform", Source = "PositionY", Name = "Position Y", Page = "Image", Default = 0.5, MinScale = 0, MaxScale = 1, },
+				ImageRotation = InstanceInput { SourceOp = "ImageTransform", Source = "Angle", Name = "Rotation", Page = "Image", Default = 0, MinScale = -180, MaxScale = 180, },
+				ImageOpacity = InstanceInput { SourceOp = "ImageOverShadow", Source = "Blend", Name = "Opacity", Page = "Image", Default = 1, MinScale = 0, MaxScale = 1, },
+				CornerRadius = InstanceInput { SourceOp = "RoundedAlphaErode", Source = "CornerRadius", Name = "Corner Radius", Page = "Rounded Corners", Default = 0.03, MinScale = 0, MaxScale = 0.5, },
+				EnableShadow = InstanceInput { SourceOp = "ShadowOverTransparent", Source = "ShadowOn", Name = "Enable Shadow", Page = "Shadow", Default = 1, },
+				ShadowStrength = InstanceInput { SourceOp = "AlphaShadow", Source = "ShadowStrength", Name = "Strength", Page = "Shadow", Default = 0.65, MinScale = 0, MaxScale = 1, },
+				ShadowRed = InstanceInput { SourceOp = "AlphaShadow", Source = "Red", Name = "Shadow Color", Page = "Shadow", ControlGroup = 10, Default = 0, },
+				ShadowGreen = InstanceInput { SourceOp = "AlphaShadow", Source = "Green", Page = "Shadow", ControlGroup = 10, Default = 0, },
+				ShadowBlue = InstanceInput { SourceOp = "AlphaShadow", Source = "Blue", Page = "Shadow", ControlGroup = 10, Default = 0, },
+				ShadowAngle = InstanceInput { SourceOp = "AlphaShadow", Source = "DropAngle", Name = "Angle", Page = "Shadow", Default = 45, MinScale = 0, MaxScale = 360, },
+				ShadowDistance = InstanceInput { SourceOp = "AlphaShadow", Source = "DropDistance", Name = "Distance", Page = "Shadow", Default = 0.02, MinScale = 0, MaxScale = 0.1, },
+				ShadowExpand = InstanceInput { SourceOp = "ShadowExpand", Source = "Size", Name = "Expand", Page = "Shadow", Default = 1, MinScale = 0.5, MaxScale = 1.5, },
+				ShadowBlur = InstanceInput { SourceOp = "AlphaShadow", Source = "PiPBlur", Name = "Blur", Page = "Shadow", Default = 0.45, MinScale = 0, MaxScale = 1, },
+				MainInput1 = InstanceInput { SourceOp = "SourceInput", Source = "Input", },
+			},
+			Outputs = {
+				MainOutput1 = InstanceOutput { SourceOp = "EffectBypass", Source = "Output", },
+			},
+			ViewInfo = GroupInfo { Pos = { 0, 0 } },
+			Tools = ordered() {
+				SourceInput = Transform {
+					CtrlWShown = false,
+					Inputs = { Size = Input { Value = 1, }, Edges = Input { Value = 0, }, },
+					ViewInfo = OperatorInfo { Pos = { -110, 0 } },
+				},
+				HQAlphaDivide = AlphaDivide {
+    Inputs = { Input = Input { SourceOp = "ImageTransform", Source = "Output", }, },
+},
+HQPremultiply = AlphaMultiply {
+    Inputs = { Input = Input { SourceOp = "RoundedAlphaRestore", Source = "Output", }, },
+},
+TransparentCanvas = Background {
+					CtrlWShown = false,
+					Inputs = { UseFrameFormatSettings = Input { Value = 1, }, Width = Input { Value = 1920, }, Height = Input { Value = 1080, }, TopLeftAlpha = Input { Value = 0, }, },
+					ViewInfo = OperatorInfo { Pos = { 0, 0 } },
+				},
+				RoundedAlphaErode = ErodeDilate {
+					Inputs = {
+						Input = Input { SourceOp = "HQAlphaDivide", Source = "Output", },
+						Filter = Input { Value = 3, }, LockXY = Input { Value = 1, },
+						Red = Input { Value = 0, }, Green = Input { Value = 0, }, Blue = Input { Value = 0, }, Alpha = Input { Value = 1, },
+						XAmount = Input { Value = -0.006, Expression = "-math.max(0, CornerRadius * 0.263 - 0.0019) * math.abs(ImageTransform.Size)", },
+						ClippingMode = Input { Value = FuID { "None" }, },
+					},
+					UserControls = ordered() {
+						CornerRadius = { LINKS_Name = "Corner Radius", LINKID_DataType = "Number", INPID_InputControl = "SliderControl", ICS_ControlPage = "Rounded Corners", INP_Default = 0.03, INP_MinScale = 0, INP_MaxScale = 0.5, },
+					},
+					ViewInfo = OperatorInfo { Pos = { 0, 0 } },
+				},
+				RoundedAlphaRestore = ErodeDilate {
+					Inputs = {
+						Input = Input { SourceOp = "RoundedAlphaErode", Source = "Output", },
+						Filter = Input { Value = 3, }, LockXY = Input { Value = 1, },
+						Red = Input { Value = 0, }, Green = Input { Value = 0, }, Blue = Input { Value = 0, }, Alpha = Input { Value = 1, },
+						XAmount = Input { Value = 0.006, Expression = "math.max(0, RoundedAlphaErode.CornerRadius * 0.263 - 0.0019) * math.abs(ImageTransform.Size)", },
+						ClippingMode = Input { Value = FuID { "None" }, },
+					},
+					ViewInfo = OperatorInfo { Pos = { 110, 0 } },
+				},
+				CanvasFit = Transform {
+					CtrlWShown = false,
+					Inputs = { Input = Input { SourceOp = "SourceInput", Source = "Output", }, Size = Input { Value = 1, }, Edges = Input { Value = 0, }, },
+					ViewInfo = OperatorInfo { Pos = { -55, 0 } },
+				},
+				ImageTransform = Transform {
+					Inputs = {
+						Input = Input { SourceOp = "CanvasFit", Source = "Output", },
+						Center = Input { Value = { 0.5, 0.5 }, Expression = "Point(PositionX, PositionY)", },
+						Size = Input { Value = 1, }, Angle = Input { Value = 0, },
+					},
+					UserControls = ordered() {
+						PositionX = { LINKS_Name = "Position X", LINKID_DataType = "Number", INPID_InputControl = "SliderControl", ICS_ControlPage = "Image", INP_Default = 0.5, INP_MinScale = 0, INP_MaxScale = 1, },
+						PositionY = { LINKS_Name = "Position Y", LINKID_DataType = "Number", INPID_InputControl = "SliderControl", ICS_ControlPage = "Image", INP_Default = 0.5, INP_MinScale = 0, INP_MaxScale = 1, },
+					},
+					ViewInfo = OperatorInfo { Pos = { 220, 0 } },
+				},
+				ShadowExpand = Transform {
+					CtrlWShown = false,
+					Inputs = { Input = Input { SourceOp = "HQPremultiply", Source = "Output", }, Size = Input { Value = 1, }, Edges = Input { Value = 0, }, },
+					ViewInfo = OperatorInfo { Pos = { 330, -110 } },
+				},
+				AlphaShadow = Shadow {
+					Inputs = {
+						Input = Input { SourceOp = "ShadowExpand", Source = "Output", },
+						ShadowOffset = Input { Value = { 0.5141421356, 0.4858578644 }, Expression = "Point(0.5 + DropDistance * math.cos(math.rad(DropAngle)), 0.5 - DropDistance * math.sin(math.rad(DropAngle)))", },
+						Softness = Input { Value = 0.0225, Expression = "PiPBlur * 0.05", },
+						Red = Input { Value = 0, }, Green = Input { Value = 0, }, Blue = Input { Value = 0, }, Alpha = Input { Value = 0.65, Expression = "ShadowStrength", },
+						OutputMode = Input { Value = 1, }, ClippingMode = Input { Value = FuID { "None" }, },
+					},
+					UserControls = ordered() {
+						ShadowStrength = { LINKS_Name = "Strength", LINKID_DataType = "Number", INPID_InputControl = "SliderControl", ICS_ControlPage = "Shadow", INP_Default = 0.65, INP_MinScale = 0, INP_MaxScale = 1, },
+						DropAngle = { LINKS_Name = "Angle", LINKID_DataType = "Number", INPID_InputControl = "ScrewControl", ICS_ControlPage = "Shadow", INP_Default = 45, INP_MinScale = 0, INP_MaxScale = 360, },
+						DropDistance = { LINKS_Name = "Distance", LINKID_DataType = "Number", INPID_InputControl = "SliderControl", ICS_ControlPage = "Shadow", INP_Default = 0.02, INP_MinScale = 0, INP_MaxScale = 0.1, },
+						PiPBlur = { LINKS_Name = "Blur", LINKID_DataType = "Number", INPID_InputControl = "SliderControl", ICS_ControlPage = "Shadow", INP_Default = 0.45, INP_MinScale = 0, INP_MaxScale = 1, },
+					},
+					ViewInfo = OperatorInfo { Pos = { 440, -110 } },
+				},
+				ShadowOverTransparent = Merge {
+					Inputs = {
+						Background = Input { SourceOp = "TransparentCanvas", Source = "Output", },
+						Foreground = Input { SourceOp = "AlphaShadow", Source = "Output", },
+						Blend = Input { Value = 1, Expression = "ShadowOn", }, PerformDepthMerge = Input { Value = 0, },
+					},
+					UserControls = ordered() {
+						ShadowOn = { LINKS_Name = "Enable Shadow", LINKID_DataType = "Number", INPID_InputControl = "CheckboxControl", ICS_ControlPage = "Shadow", INP_Default = 1, },
+					},
+					ViewInfo = OperatorInfo { Pos = { 550, -110 } },
+				},
+				ImageOverShadow = Merge {
+					Inputs = {
+						Background = Input { SourceOp = "ShadowOverTransparent", Source = "Output", },
+						Foreground = Input { SourceOp = "HQPremultiply", Source = "Output", },
+						Blend = Input { Value = 1, }, PerformDepthMerge = Input { Value = 0, },
+					},
+					ViewInfo = OperatorInfo { Pos = { 660, 0 } },
+				},
+				EffectBypass = Dissolve {
+					Inputs = {
+						Background = Input { SourceOp = "SourceInput", Source = "Output", },
+						Foreground = Input { SourceOp = "ImageOverShadow", Source = "Output", },
+						Mix = Input { Value = 1, Expression = "EffectEnabled", },
+					},
+					UserControls = ordered() {
+						EffectEnabled = { LINKS_Name = "Enable Effect", LINKID_DataType = "Number", INPID_InputControl = "CheckboxControl", ICS_ControlPage = "Image", INP_Default = 1, },
+					},
+					ViewInfo = OperatorInfo { Pos = { 770, 0 } },
+				},
+			},
+		},
+	},
+	ActiveTool = "RoundedImageShadow"
+}
