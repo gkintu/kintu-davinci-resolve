@@ -1,14 +1,18 @@
 # Kintu DaVinci Resolve
 
-I'll be adding custom effects and plugins here that I wish DaVinci Resolve had built in.
+I'll be adding custom effects and plugins here for things I wish DaVinci Resolve made drag-and-drop simple.
 
 ## Rounded Image + Shadow
 
 A quick way to give images and videos rounded corners and a drop shadow, across different dimensions and aspect ratios.
 
-| Without the effect | With Rounded Image + Shadow |
-| --- | --- |
-| ![Without the effect: square corners and no shadow](assets/rounded-image-shadow-before.png) | ![With the effect: rounded corners and a drop shadow](assets/rounded-image-shadow-after.png) |
+**Without the effect**
+
+![Without the effect: square corners and no shadow](assets/rounded-image-shadow-before.png)
+
+**With Rounded Image + Shadow**
+
+![With the effect: rounded corners and a drop shadow](assets/rounded-image-shadow-after.png)
 
 ## Install
 
